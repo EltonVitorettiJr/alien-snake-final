@@ -3,34 +3,126 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Snake Ryse</title>
-    <style>
-      body {
-        margin: 0;
-        background-color: #121214;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        color: #ffffff;
-        font-family: sans-serif;
-      }
-      #score-board {
-        font-size: 1.5rem;
-        margin-bottom: 12px;
-      }
-      canvas {
-        background-color: #202024;
-        border: 2px solid #8257e5;
-        border-radius: 8px;
-        box-shadow: 0 0 20px rgba(130, 87, 229, 0.3);
-      }
-    </style>
+    <title>Alien Snake</title>
+    <link rel="stylesheet" href="src/style.css">
   </head>
   <body>
-    <div id="score-board">Pontos: <span id="score">0</span></div>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div class="game-container">
+      <div id="score-board">Pontos: <span id="score">0</span></div>
+      
+      <canvas id="game-canvas" width="600" height="600"></canvas>
+
+      <!-- HUD DE POWER-UPS (Fica invisível por padrão) -->
+      <div id="powerup-hud" class="hidden">
+        <div class="powerup-content">
+          <div class="powerup-icon" id="powerup-icon">❄️</div>
+          <div class="powerup-texts">
+            <strong id="powerup-name">Gelo</strong>
+            <span id="powerup-desc">lento - pedras atravessáveis</span>
+          </div>
+          <div class="powerup-timer" id="powerup-timer">3.7s</div>
+        </div>
+        <!-- A barrinha que vai encolhendo -->
+        <div class="powerup-bar-bg">
+          <div class="powerup-bar-fill" id="powerup-bar-fill"></div>
+        </div>
+      </div>
+      
+      <!-- Tela de Game Over -->
+      <div id="game-over-screen" class="hidden">
+        <div class="game-over-content">
+          <h2 class="glitch-text">Voce perdeu</h2>
+          <h1>GAME OVER</h1>
+          
+          <div class="stats-box">
+            <span>Pontuação Final</span>
+            <strong id="final-score">0</strong>
+          </div>
+
+          <div class="game-over-actions">
+            <button id="restart-btn" class="primary-btn" type="button">
+              Tentar de novo <kbd>ENTER</kbd>
+            </button>
+            <span class="secondary-action">Voltar ao Menu <kbd>ESC</kbd></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tela de Início -->
+      <div id="start-screen">
+        <div id="content">
+          <div class="start-header">
+            <span class="label">MINIGAME</span>
+            <h1>ALIEN <span>SNAKE</span></h1>
+            <p>Cresça coletando e sobreviva ao que você mesmo largou pelo caminho com poderes especiais.</p>
+          </div>
+          <div class="start-columns">
+            <div class="items-col">
+              <h3>ITENS</h3>
+          
+              <div class="item-row">
+                <div class="item-icon" style="background: #ff0055;"></div>
+                <div class="item-text">
+                  <strong>Comida <span class="pts">+10</span></strong>
+                  <p>O básico. Cresce um segmento e mantém o jogo andando.</p>
+                </div>
+              </div>
+              <div class="item-row">
+                <div class="item-icon" style="background: #ff8000;"></div>
+                <div class="item-text">
+                  <strong>Fogo <span class="pts">+15</span></strong>
+                  <p>Risco: +50% de velocidade e pontos em dobro por 5s.</p>
+                </div>
+              </div>
+              <div class="item-row">
+                <div class="item-icon" style="background: #00BFFF;"></div>
+                <div class="item-text">
+                  <strong>Gelo <span class="pts">+15</span></strong>
+                  <p>Alívio: -40% de velocidade para você pensar.</p>
+                </div>
+              </div>
+              <div class="item-row">
+                <div class="item-icon" style="background: #8B4513;"></div>
+                <div class="item-text">
+                  <strong>Terra <span class="pts">+15</span></strong>
+                  <p>Aposta: espalha 6 pedras pelo mapa. Cuidado onde pisa.</p>
+                </div>
+              </div>
+            </div>
+            <div class="controls-col">
+              <h3>CONTROLES</h3>
+          
+              <div class="control-row">
+                <span>Mover</span>
+                <div class="keys">
+                  <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+                </div>
+              </div>
+              <div class="control-row">
+                <span>Recomeçar / Iniciar</span>
+                <div class="keys"><kbd>Enter</kbd></div>
+              </div>
+              <div class="control-row">
+                <span>Pausar / Voltar ao menu</span>
+                <div class="keys"><kbd>Esc</kbd></div>
+              </div>
+              <div class="control-row">
+                <span>Ligar / Desligar Efeitos</span>
+                <div class="keys"><kbd>N</kbd></div>
+              </div>
+              <div class="control-row">
+                <span>Ligar / Desligar Trilha</span>
+                <div class="keys"><kbd>M</kbd></div>
+              </div>
+            </div>
+          </div>
+          <div class="start-footer">
+            <button id="start-btn" type="button">Jogar de novo <kbd>ENTER</kbd></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
