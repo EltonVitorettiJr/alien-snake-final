@@ -15,6 +15,10 @@ const powerupDesc = document.getElementById('powerup-desc') as HTMLElement;
 const powerupTimer = document.getElementById('powerup-timer') as HTMLElement;
 const powerupBarFill = document.getElementById('powerup-bar-fill') as HTMLElement;
 const powerupIcon = document.getElementById('powerup-icon') as HTMLElement;
+const highScoreElement = document.getElementById('high-score') as HTMLElement;
+const snakeSizeElement = document.getElementById('snake-size') as HTMLElement;
+const startScreenRecord = document.getElementById('start-screen-record') as HTMLElement;
+const pauseScreen = document.getElementById('pause-screen') as HTMLElement;
 
 export function draw() {
   ctx.fillStyle = "#202024";
@@ -39,6 +43,12 @@ export function draw() {
   }
 
   // 3. Desenha a Cobra por cima do Grid
+  const isGhost = state.ghostEffectExpiration > Date.now();
+
+  if (isGhost) {
+    ctx.globalAlpha = 0.4; // Deixa a cobra 60% transparente!
+  }
+
   ctx.fillStyle = "#04d361";
   state.snake.forEach((segment) => {
     const padding = 4;
@@ -52,6 +62,8 @@ export function draw() {
     );
   });
 
+  ctx.globalAlpha = 1.0;
+
   const padding = 4;
   const offset = padding / 2;
   const renderSize = GRID_SIZE - padding;
@@ -63,10 +75,14 @@ export function draw() {
   });
 
   // 5. Pinta o Item Atual baseado no tipo
-  if (state.currentItem.type === 'earth_fruit') ctx.fillStyle = '#6c360f';
+  if (state.currentItem.type === 'earth_fruit') ctx.fillStyle = '#8B4513';
   else if (state.currentItem.type === 'ice_fruit') ctx.fillStyle = '#00BFFF';
-  else if (state.currentItem.type === 'extra_points') ctx.fillStyle = '#e1e1e6';
-  else if (state.currentItem.type === 'fire_fruit') ctx.fillStyle = '#ff8000';
+  else if (state.currentItem.type === 'extra_points') ctx.fillStyle = '#efefef';
+  else if (state.currentItem.type === 'fire_fruit') ctx.fillStyle = '#FF4500';
+  else if (state.currentItem.type === 'shrink_pill') ctx.fillStyle = '#ffd166';
+  else if (state.currentItem.type === 'magnet_fruit') ctx.fillStyle = '#ff70a6';
+  else if (state.currentItem.type === 'poison_apple') ctx.fillStyle = '#38b000';
+  else if (state.currentItem.type === 'ghost_fruit') ctx.fillStyle = '#9d4edd';
   else ctx.fillStyle = '#ff0055';
 
   ctx.fillRect(
@@ -79,6 +95,20 @@ export function draw() {
 
 export function updateUI() {
   scoreElement.innerText = state.score.toString();
+
+  if (startScreenRecord) startScreenRecord.innerText = state.highScore.toString();
+
+  // === LÓGICA DO RECORDE ===
+  // Se a pontuação atual passar o recorde, a gente salva na hora!
+  if (state.score > state.highScore) {
+    state.highScore = state.score;
+    localStorage.setItem('alienSnakeRecorde', state.highScore.toString());
+  }
+
+  // === ATUALIZA OS TEXTOS NO HTML ===
+  if (scoreElement) scoreElement.innerText = state.score.toString();
+  if (highScoreElement) highScoreElement.innerText = state.highScore.toString();
+  if (snakeSizeElement) snakeSizeElement.innerText = state.snake.length.toString();
 
   // Controle da Tela Inicial
   if (!state.isGameStarted) {
@@ -98,48 +128,90 @@ export function updateUI() {
     gameOverScreen.classList.add('hidden');
   }
 
-  const now = Date.now();
-  let activeEffect = '';
-  let timeLeft = 0;
-  const totalTime = 5000; // Efeitos duram 5 segundos
-
-  // Descobre quem está ativo e quanto tempo falta
-  if (state.iceEffectExpiration > now) {
-    activeEffect = 'ice';
-    timeLeft = state.iceEffectExpiration - now;
-  } else if (state.fireEffectExpiration > now) {
-    activeEffect = 'fire';
-    timeLeft = state.fireEffectExpiration - now;
+  // Controle da Tela de Pausa
+  if (state.isPaused && state.isGameStarted && !state.isGameOver) {
+    if (pauseScreen) pauseScreen.classList.remove('hidden');
+  } else {
+    if (pauseScreen) pauseScreen.classList.add('hidden');
   }
 
-  // Se tem efeito rolando, desenha o HUD
-  if (activeEffect) {
+  // ==========================================
+  // HUD DE POWER-UPS
+  // ==========================================
+  const now = Date.now();
+  let activeEffect = '';
+  let expiration = 0;
+  let totalTime = 5000; // Tempo padrão, mas agora ele muda!
+
+  // 1. Descobre o tempo das pedras (pega a que vai demorar mais pra sumir)
+  const maxObstacleTime = state.obstacles.length > 0
+    ? Math.max(...state.obstacles.map(obs => obs.expiresAt))
+    : 0;
+
+  // 2. Compara todos os efeitos e mostra o que tem o maior tempo restante
+  if (state.iceEffectExpiration > now && state.iceEffectExpiration > expiration) {
+    activeEffect = 'ice'; expiration = state.iceEffectExpiration; totalTime = 5000;
+  }
+  if (state.fireEffectExpiration > now && state.fireEffectExpiration > expiration) {
+    activeEffect = 'fire'; expiration = state.fireEffectExpiration; totalTime = 5000;
+  }
+  if (maxObstacleTime > now && maxObstacleTime > expiration) {
+    activeEffect = 'earth'; expiration = maxObstacleTime; totalTime = 5000;
+  }
+
+  // NOVOS EFEITOS AQUI:
+  if (state.ghostEffectExpiration > now && state.ghostEffectExpiration > expiration) {
+    activeEffect = 'ghost'; expiration = state.ghostEffectExpiration; totalTime = 8000;
+  }
+  if (state.magnetEffectExpiration > now && state.magnetEffectExpiration > expiration) {
+    activeEffect = 'magnet'; expiration = state.magnetEffectExpiration; totalTime = 10000;
+  }
+  if (state.poisonEffectExpiration > now && state.poisonEffectExpiration > expiration) {
+    activeEffect = 'poison'; expiration = state.poisonEffectExpiration; totalTime = 4000;
+  }
+
+  const timeLeft = expiration - now;
+
+  // 3. Atualiza a tela se houver algum efeito rolando
+  if (activeEffect && timeLeft > 0) {
     powerupHud.classList.remove('hidden');
 
-    // Calcula os segundos com 1 casa decimal (ex: 3.7s)
+    // Atualiza os segundos
     const seconds = (timeLeft / 1000).toFixed(1);
     powerupTimer.innerText = `${seconds}s`;
 
-    // Calcula a porcentagem da barra para ela ir encolhendo
+    // Atualiza a barrinha (agora com a porcentagem perfeita pra cada tempo!)
     const percent = (timeLeft / totalTime) * 100;
     powerupBarFill.style.width = `${percent}%`;
 
-    // Troca as cores e textos dependendo da fruta
+    // Troca as cores e textos dependendo do poder ativo
     if (activeEffect === 'ice') {
-      powerupIcon.innerText = '❄️';
-      powerupName.innerText = 'Gelo';
-      powerupName.style.color = '#00BFFF';
-      powerupDesc.innerText = 'lento - mais tempo pra pensar';
+      powerupIcon.innerText = '❄️'; powerupName.innerText = 'Gelo';
+      powerupName.style.color = '#00BFFF'; powerupDesc.innerText = 'Tempo para pensar...';
       powerupBarFill.style.backgroundColor = '#00BFFF';
     } else if (activeEffect === 'fire') {
-      powerupIcon.innerText = '🔥';
-      powerupName.innerText = 'Fogo';
-      powerupName.style.color = '#FF4500';
-      powerupDesc.innerText = 'frenético - pontos x3';
+      powerupIcon.innerText = '🔥'; powerupName.innerText = 'Fogo';
+      powerupName.style.color = '#FF4500'; powerupDesc.innerText = 'Frenético! Pontos x3';
       powerupBarFill.style.backgroundColor = '#FF4500';
+    } else if (activeEffect === 'earth') {
+      powerupIcon.innerText = '🪨'; powerupName.innerText = 'Terra';
+      powerupName.style.color = '#b47b4d'; powerupDesc.innerText = 'Cuidado por onde anda!';
+      powerupBarFill.style.backgroundColor = '#b47b4d';
+    } else if (activeEffect === 'ghost') {
+      powerupIcon.innerText = '👻'; powerupName.innerText = 'Fantasma';
+      powerupName.style.color = '#9d4edd'; powerupDesc.innerText = 'Sinto que estou intangível!';
+      powerupBarFill.style.backgroundColor = '#9d4edd';
+    } else if (activeEffect === 'magnet') {
+      powerupIcon.innerText = '🧲'; powerupName.innerText = 'Ímã';
+      powerupName.style.color = '#ff70a6'; powerupDesc.innerText = 'Venham para mim!';
+      powerupBarFill.style.backgroundColor = '#ff70a6';
+    } else if (activeEffect === 'poison') {
+      powerupIcon.innerText = '☠️'; powerupName.innerText = 'Veneno';
+      powerupName.style.color = '#38b000'; powerupDesc.innerText = 'Controles invertidos, sobreviva!';
+      powerupBarFill.style.backgroundColor = '#38b000';
     }
   } else {
-    // Sem efeito, o HUD some
+    // Sem efeito, esconde o HUD
     powerupHud.classList.add('hidden');
   }
 }

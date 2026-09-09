@@ -13,6 +13,7 @@ function gameLoop(timestamp: number) {
   window.requestAnimationFrame(gameLoop);
 
   if (state.isPaused) {
+    updateUI();
     return;
   }
 

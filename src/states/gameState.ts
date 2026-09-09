@@ -1,4 +1,4 @@
-export type ItemType = 'food' | 'extra_points' | 'earth_fruit' | 'ice_fruit' | 'fire_fruit';
+export type ItemType = 'food' | 'extra_points' | 'earth_fruit' | 'ice_fruit' | 'fire_fruit' | 'ghost_fruit' | 'magnet_fruit' | 'poison_fruit' | 'shrink_pill' | 'poison_apple';
 
 export const state = {
   snake: [{ x: 10, y: 10 }],
@@ -11,6 +11,7 @@ export const state = {
   isGameOver: false,
   isGameStarted: false,
   isPaused: false,
+  highScore: Number(localStorage.getItem('alienSnakeRecorde')) || 0,
 
   // Controle de Tempo e Velocidade
   lastTime: 0,
@@ -18,6 +19,9 @@ export const state = {
   iceEffectExpiration: 0,
   fireEffectExpiration: 0,
   earthEffectExpiration: 0,
+  ghostEffectExpiration: 0,
+  magnetEffectExpiration: 0,
+  poisonEffectExpiration: 0,
 };
 
 export function resetState() {
@@ -35,4 +39,8 @@ export function resetState() {
   state.speed = 8;
   state.iceEffectExpiration = 0;
   state.fireEffectExpiration = 0;
+  state.earthEffectExpiration = 0;
+  state.ghostEffectExpiration = 0;
+  state.magnetEffectExpiration = 0;
+  state.poisonEffectExpiration = 0;
 }

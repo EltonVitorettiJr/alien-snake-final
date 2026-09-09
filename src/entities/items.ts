@@ -21,13 +21,23 @@ export function spawnItem() {
 
   // Mais chances de vir comida normal
   const types: ItemType[] = [
-    "food",
-    "food",
-    "food",
-    "extra_points",
-    "earth_fruit",
-    "ice_fruit",
-    "fire_fruit",
+    // COMUM: 60% de chance (12 entradas)
+    'food', 'food', 'food', 'food', 'food', 'food',
+    'food', 'food', 'food', 'food', 'food', 'food',
+
+    // INCOMUM: 10% de chance (2 entradas)
+    'extra_points', 'extra_points',
+
+    // RARO: ~5% de chance cada (1 entrada cada)
+    'earth_fruit',
+    'ice_fruit',
+    'fire_fruit',
+    'ghost_fruit',
+    'magnet_fruit',
+    'poison_apple',
+
+    // LENDÁRIO/MÍTICO: Só tem 1 pílula num pool de mais de 20 itens!
+    'shrink_pill'
   ];
   const randomType = types[Math.floor(Math.random() * types.length)];
 

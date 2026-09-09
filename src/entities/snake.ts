@@ -4,42 +4,63 @@ import { spawnItem, spawnObstacles } from "./items";
 
 export function updateSnake() {
   if (state.inputQueue.length > 0) {
-    state.currentDirection = state.inputQueue.shift() as { x: number, y: number };
+    state.currentDirection = state.inputQueue.shift() as {
+      x: number;
+      y: number;
+    };
   }
 
   const dir = state.currentDirection;
   if (dir.x === 0 && dir.y === 0) return;
 
   const head = { x: state.snake[0].x + dir.x, y: state.snake[0].y + dir.y };
+  const now = Date.now();
+  const isGhost = state.ghostEffectExpiration > now;
 
-  // 1. COLISÕES FATAIS
-  if (
-    head.x < 0 ||
-    head.x >= TILE_COUNT ||
-    head.y < 0 ||
-    head.y >= TILE_COUNT
-  ) {
-    state.isGameOver = true;
-    return;
-  }
-  if (
-    state.snake.some((segment) => segment.x === head.x && segment.y === head.y)
-  ) {
-    state.isGameOver = true;
-    return;
-  }
-  if (state.obstacles.some((obs) => obs.x === head.x && obs.y === head.y)) {
-    state.isGameOver = true;
-    return;
+  // 1. COLISÕES COM PAREDES (Efeito Fantasma)
+  if (isGhost) {
+    if (head.x < 0) head.x = TILE_COUNT - 1;
+    if (head.x >= TILE_COUNT) head.x = 0;
+    if (head.y < 0) head.y = TILE_COUNT - 1;
+    if (head.y >= TILE_COUNT) head.y = 0;
+  } else {
+    // Morte normal na parede se não for fantasma
+    if (head.x < 0 || head.x >= TILE_COUNT || head.y < 0 || head.y >= TILE_COUNT) {
+      state.isGameOver = true; return;
+    }
   }
 
-  // 2. MOVIMENTO
-  state.snake.unshift(head);
+  // Colisão com próprio corpo e pedras (Continua fatal)
+  if (!isGhost) {
+    if (state.snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+      state.isGameOver = true; return;
+    }
+  }
 
-  // 3. COMER O ITEM
+  // Colisão com pedras (Continua fatal sempre)
+  if (state.obstacles.some(obs => obs.x === head.x && obs.y === head.y)) {
+    state.isGameOver = true; return;
+  }
+
+  // 2. EFEITO ÍMÃ (Puxa itens bons pra perto se estiver a 3 blocos de distância)
   const item = state.currentItem;
+
+  // Define que o ímã puxa tudo, exceto veneno e terra
+  const isPullable = item.type !== "poison_apple" && item.type !== "earth_fruit" && item.type !== "fire_fruit";
+
+  if (state.magnetEffectExpiration > now && isPullable) {
+    const dist = Math.abs(head.x - item.x) + Math.abs(head.y - item.y);
+    if (dist <= 3) {
+      item.x = head.x; // Teleporta o item direto pra boca da cobra!
+      item.y = head.y;
+    }
+  }
+
+  // 3. MOVIMENTO
+  state.snake.unshift({ x: head.x, y: head.y });
+
+  // 4. COMER O ITEM
   if (head.x === item.x && head.y === item.y) {
-    const now = Date.now();
     let pointsGained = 0;
 
     switch (item.type) {
@@ -49,30 +70,52 @@ export function updateSnake() {
         break;
       case "ice_fruit":
         pointsGained = 15;
-        state.speed = 4; // Fica lerdo
+        state.speed = 4;
         state.iceEffectExpiration = now + 5000;
-        state.fireEffectExpiration = 0; // Apaga o fogo
+        state.fireEffectExpiration = 0;
         break;
       case "fire_fruit":
         pointsGained = 15;
-        state.speed = 14; // Fica frenético
+        state.speed = 14;
         state.fireEffectExpiration = now + 5000;
-        state.iceEffectExpiration = 0; // Derrete o gelo
+        state.iceEffectExpiration = 0;
         break;
       case "extra_points":
         pointsGained = 30;
         break;
-      default:
+
+      // NOVOS EFEITOS
+      case "ghost_fruit":
+        pointsGained = 20;
+        state.ghostEffectExpiration = now + 8000;
+        break; // 8s de fantasma
+      case "magnet_fruit":
+        pointsGained = 20;
+        state.magnetEffectExpiration = now + 10000;
+        break; // 10s de ímã
+      case "poison_apple":
+        pointsGained = -10;
+        state.poisonEffectExpiration = now + 4000;
+        break; // 4s de controles invertidos
+      case "shrink_pill": {
+        pointsGained = 0;
+        // Corta a cobra pela metade, mas garante que não fique menor que 2 gomos
+        const newLength = Math.max(2, Math.floor(state.snake.length / 2));
+        state.snake = state.snake.slice(0, newLength);
+        break;
+      }
+      default: {
         pointsGained = 10;
         break;
+      }
     }
 
-    // Enquanto estiver com o power-up de fogo, ganha 3 vezes mais pontos
-    if (state.fireEffectExpiration > now) {
-      pointsGained *= 3;
-    }
-
+    if (state.fireEffectExpiration > now) pointsGained *= 3;
     state.score += pointsGained;
+
+    // Evita pontuação negativa no veneno
+    if (state.score < 0) state.score = 0;
+
     spawnItem();
   } else {
     state.snake.pop(); // Remove o rabo se não comeu

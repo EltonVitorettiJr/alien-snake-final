@@ -8,7 +8,21 @@
   </head>
   <body>
     <div class="game-container">
-      <div id="score-board">Pontos: <span id="score">0</span></div>
+      <!-- HUD SUPERIOR (Placar e Status) -->
+      <div id="top-hud">
+        <div class="stat-item">
+          <span class="stat-label">PONTOS</span>
+          <strong class="stat-value highlight" id="score">0</strong>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">RECORDE</span>
+          <strong class="stat-value" id="high-score">0</strong>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">TAMANHO</span>
+          <strong class="stat-value" id="snake-size">1</strong>
+        </div>
+      </div>
       
       <canvas id="game-canvas" width="600" height="600"></canvas>
 
@@ -48,9 +62,22 @@
         </div>
       </div>
 
+      <!-- Tela de Pausa -->
+      <div id="pause-screen" class="hidden">
+        <div class="pause-content">
+          <h2 class="glitch-text" style="color: #00BFFF;">SISTEMA EM ESPERA</h2>
+          <h1>PAUSADO</h1>
+          
+          <div class="game-over-actions">
+            <span class="secondary-action">Voltar pro jogo <kbd>ESPAÇO</kbd></span>
+            <span class="secondary-action">Menu Inicial <kbd>ESC</kbd></span>
+          </div>
+        </div>
+      </div>
+
       <!-- Tela de Início -->
       <div id="start-screen">
-        <div id="content">
+        <div id="start-content">
           <div class="start-header">
             <span class="label">MINIGAME</span>
             <h1>ALIEN <span>SNAKE</span></h1>
@@ -60,35 +87,75 @@
             <div class="items-col">
               <h3>ITENS</h3>
           
-              <div class="item-row">
-                <div class="item-icon" style="background: #ff0055;"></div>
-                <div class="item-text">
-                  <strong>Comida <span class="pts">+10</span></strong>
-                  <p>O básico. Cresce um segmento e mantém o jogo andando.</p>
+              <div id="items-list">
+                <div class="item-row">
+                  <div class="item-icon" style="background: #ff0055;"></div>
+                  <div class="item-text">
+                    <strong>Maçã <span class="pts">+10</span></strong>
+                    <p>O básico. Cresce um segmento e mantém o jogo andando.</p>
+                  </div>
                 </div>
-              </div>
-              <div class="item-row">
-                <div class="item-icon" style="background: #ff8000;"></div>
-                <div class="item-text">
-                  <strong>Fogo <span class="pts">+15</span></strong>
-                  <p>Risco: +50% de velocidade e pontos em dobro por 5s.</p>
+                <div class="item-row">
+                  <div class="item-icon" style="background: #ff8000;"></div>
+                  <div class="item-text">
+                    <strong>Fruta de Fogo <span class="pts">+15</span></strong>
+                    <p>Risco: +50% de velocidade e pontos em dobro por 5s.</p>
+                  </div>
                 </div>
-              </div>
-              <div class="item-row">
-                <div class="item-icon" style="background: #00BFFF;"></div>
-                <div class="item-text">
-                  <strong>Gelo <span class="pts">+15</span></strong>
-                  <p>Alívio: -40% de velocidade para você pensar.</p>
+                <div class="item-row">
+                  <div class="item-icon" style="background: #00BFFF;"></div>
+                  <div class="item-text">
+                    <strong>Fruta de Gelo <span class="pts">+15</span></strong>
+                    <p>Alívio: -40% de velocidade para você pensar.</p>
+                  </div>
                 </div>
-              </div>
-              <div class="item-row">
-                <div class="item-icon" style="background: #8B4513;"></div>
-                <div class="item-text">
-                  <strong>Terra <span class="pts">+15</span></strong>
-                  <p>Aposta: espalha 6 pedras pelo mapa. Cuidado onde pisa.</p>
+                <div class="item-row">
+                  <div class="item-icon" style="background: #8B4513;"></div>
+                  <div class="item-text">
+                    <strong>Fruta de Terra <span class="pts">+15</span></strong>
+                    <p>Aposta: espalha 6 pedras por 5 segundos pelo mapa. Cuidado por onde anda.</p>
+                  </div>
+                </div>
+                <div class="item-row">
+                  <div class="item-icon" style="background: #efefef;"></div>
+                  <div class="item-text">
+                    <strong>Essência <span class="pts">+30</span></strong>
+                    <p>Cresce um segmento e alguns pontos extras!</p>
+                  </div>
+                </div>
+                <div class="item-row">
+                  <div class="item-icon" style="background: #38b000;"></div>
+                  <div class="item-text">
+                    <strong>Fruta Venenosa <span class="pts">-10</span></strong>
+                    <p>Cuidado! Esta fruta inverte os controles por 4s.</p>
+                  </div>
+                </div>
+                <div class="item-row">
+                  <div class="item-icon" style="background: #ff70a6;"></div>
+                  <div class="item-text">
+                    <strong>Fruta Magnética <span class="pts">+15</span></strong>
+                    <p>Pegue frutas em um raio de 3 blocos por 8 segundos!</p>
+                  </div>
+                </div>
+                <div class="item-row">
+                  <div class="item-icon" style="background: #ffd166;"></div>
+                  <div class="item-text">
+                    <strong>Pílula do Encolhimento <span class="pts">-50</span></strong>
+                    <p>Diminui a cobra pela metade em troca de 50 pontos.</p>
+                  </div>
+                </div>
+                <div class="item-row">
+                  <div class="item-icon" style="background: #9d4edd;"></div>
+                  <div class="item-text">
+                    <strong>Fruta Fantasma <span class="pts">+20</span></strong>
+                    <p>
+                      Atravesse as paredes e seu próprio corpo. <br><u>OBS: As pedras continuam como um obstáculo.</u>
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
+            
             <div class="controls-col">
               <h3>CONTROLES</h3>
           
@@ -117,6 +184,7 @@
             </div>
           </div>
           <div class="start-footer">
+            <p class="start-record">RECORDE: <span id="start-screen-record">0</span></p>
             <button id="start-btn" type="button">Jogar de novo <kbd>ENTER</kbd></button>
           </div>
         </div>

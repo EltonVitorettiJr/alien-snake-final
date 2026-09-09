@@ -22,6 +22,19 @@ body {
   align-items: center;
 }
 
+.start-record {
+  color: #71717a;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+.start-record span {
+  color: #c6ff00;
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-left: 4px;
+}
+
 #game-over-screen {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
@@ -117,8 +130,9 @@ body {
   gap: 8px;
 }
 
-#content {
+#start-content {
   max-width: 1024px;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .game-container {
@@ -244,6 +258,11 @@ h3 {
 }
 
 /* Lista de Itens */
+#items-list {
+  height: 310px;
+  overflow-y: auto;
+}
+
 .item-row {
   display: flex;
   gap: 15px;
@@ -302,7 +321,8 @@ kbd {
 /* Rodapé e Botão */
 .start-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   padding-top: 20px;
   border-top: 1px solid #27272a;
 }
@@ -327,7 +347,77 @@ kbd {
   font-weight: bold;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+/* =========================================
+   HUD SUPERIOR (PLACAR E STATUS)
+   ========================================= */
+#top-hud {
+  width: 600px; /* Mesma largura do canvas para alinhar certinho */
+  display: flex;
+  justify-content: flex-end; /* Joga tudo para a direita */
+  gap: 25px;
+  margin-bottom: 15px;
 }
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.stat-label {
+  color: #71717a;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.stat-value {
+  color: #e4e4e7;
+  font-size: 1.2rem;
+  font-family: "Chakra Petch", sans-serif; /* Usando a fonte tech que você importou */
+  line-height: 1.1;
+}
+
+.stat-value.highlight {
+  color: #c6ff00; /* O Verde Neon da RyseRP */
+}
+
+.stat-value small {
+  color: #a1a1aa;
+  font-size: 0.75rem;
+  margin-left: 3px;
+  font-family: "Poppins", sans-serif;
+}
+
+/* =========================================
+TELA DE PAUSA
+========================================= */
+#pause-screen {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-color: rgba(9, 9, 11, 0.75); /* Um pouco mais transparente que o Game Over */
+  backdrop-filter: blur(6px); /* Embaça o jogo no fundo */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.pause-content {
+  text-align: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+#pause-screen h1 {
+  color: #ffffff;
+  font-size: 4.5rem;
+  margin: 0 0 30px 0;
+  letter-spacing: 5px;
+  text-shadow: 0 0 15px rgba(0, 191, 255, 0.4); /* Brilho azulzinho */
+  font-family: "Chakra Petch", sans-serif;
+}
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
