@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Gotas Fantasmagóricas (Ciano, mantendo a essência da sua imagem original) -->
+  <path d="M 22 15 Q 12 28 12 35 A 10 10 0 0 0 32 35 Q 32 28 22 15 Z" fill="#48cae4" stroke="#1c053a" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M 80 20 Q 70 33 70 40 A 10 10 0 0 0 90 40 Q 90 33 80 20 Z" fill="#48cae4" stroke="#1c053a" stroke-width="5" stroke-linejoin="round"/>
+  
+  <!-- Fogo Principal (Roxo Fantasma, preenchido com borda grossa) -->
+  <path d="M 50 15 
+           C 38 30 32 40 28 45 
+           C 22 38 15 45 15 58 
+           C 15 78 30 92 50 92 
+           C 70 92 85 78 85 58 
+           C 85 45 78 38 70 48 
+           C 72 38 65 30 50 15 Z" 
+        fill="#9d4edd" stroke="#1c053a" stroke-width="5" stroke-linejoin="round"/>
+        
+  <!-- Núcleo do Fogo (Roxo Claro para dar o efeito de labareda acesa) -->
+  <path d="M 50 45 C 42 55 35 60 35 70 C 35 80 42 85 50 85 C 58 85 65 80 65 70 C 65 60 58 55 58 55 C 58 55 60 62 55 68 C 50 72 48 68 48 68 C 48 68 55 55 50 45 Z" fill="#c77dff"/>
+</svg>

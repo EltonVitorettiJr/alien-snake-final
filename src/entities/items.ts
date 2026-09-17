@@ -58,6 +58,6 @@ export function spawnObstacles(now: number) {
       (state.currentItem.x !== ox || state.currentItem.y !== oy)
     );
 
-    state.obstacles.push({ x: ox, y: oy, expiresAt: now + 5000 });
+    state.obstacles.push({ x: ox, y: oy, expiresAt: now + 15000 });
   }
 }

@@ -261,6 +261,10 @@ h3 {
 #items-list {
   height: 310px;
   overflow-y: auto;
+
+  img {
+    height: 20px;
+  }
 }
 
 .item-row {
