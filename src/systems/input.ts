@@ -1,12 +1,14 @@
 import { resetState, state } from "../states/gameState";
 
 export function setupInput(onRestart: () => void) {
+  // Pega os Elementos do HTML
   const startBtn = document.getElementById("start-btn") as HTMLButtonElement;
   const restartBtn = document.getElementById(
     "restart-btn",
   ) as HTMLButtonElement;
 
   if (startBtn) {
+    // Escuta quando ocorre o Evento de Click
     startBtn.addEventListener("click", () => {
       if (state.isGameOver || !state.isGameStarted) {
         resetState();
@@ -17,6 +19,7 @@ export function setupInput(onRestart: () => void) {
   }
 
   if (restartBtn) {
+    // Escuta quando ocorre o Evento de Click
     restartBtn.addEventListener("click", () => {
       if (state.isGameOver || !state.isGameStarted) {
         resetState();
@@ -26,6 +29,7 @@ export function setupInput(onRestart: () => void) {
     });
   }
 
+  // Escuta quando ocorre o Evento de Teclado
   window.addEventListener("keydown", (e) => {
     if ((state.isGameOver || !state.isGameStarted) && e.key === "Enter") {
       resetState();

@@ -19,19 +19,23 @@ function gameLoop(timestamp: number) {
 
   const now = Date.now();
 
-  // 1. Remove pedras que já derreteram/expiraram
+  // Remove pedras que já expiraram
   state.obstacles = state.obstacles.filter(obs => obs.expiresAt > now);
 
-  // 2. Volta a velocidade ao normal (8) se os poderes acabaram
+  // Volta a velocidade ao normal se os poderes acabaram
   if (state.iceEffectExpiration > 0 && now > state.iceEffectExpiration) {
     state.speed = 8;
     state.iceEffectExpiration = 0;
   }
+
   if (state.fireEffectExpiration > 0 && now > state.fireEffectExpiration) {
     state.speed = 8;
     state.fireEffectExpiration = 0;
   }
 
+  // Tempo que se passou entre o último frame renderizado e o frame atual
+  // Se a velocidade do jogo dependesse apenas dos frames do monitor, um PC gamer moderno rodando a 144Hz faria a sua
+  // cobra andar mais que o dobro da velocidade de um notebook comum rodando a 60Hz.
   const deltaTime = (timestamp - state.lastTime) / 1000;
   if (deltaTime < 1 / state.speed) return;
 

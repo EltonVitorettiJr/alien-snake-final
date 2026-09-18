@@ -1,4 +1,3 @@
-// Importando os Itens e Obstáculos
 import appleSvg from "../assets/apple.svg";
 import bodySvg from "../assets/body-snake.svg";
 import curveSvg from "../assets/curve-snake.svg";
@@ -71,6 +70,7 @@ headTongueImg.src = headTongueSvg;
 const earthImg = new Image();
 earthImg.src = earthSvg;
 
+// Função auxiliar para desenhar imagens rotacionadas
 function drawRotatedImage(
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement,
@@ -81,45 +81,49 @@ function drawRotatedImage(
   scale: number = 1,
 ) {
   ctx.save();
+
   const drawSize = size * scale; // Aplica o zoom
+
   ctx.translate(x * size + size / 2, y * size + size / 2);
+
   ctx.rotate(angle);
+
   // Desenha com o tamanho ampliado
   ctx.drawImage(img, -drawSize / 2, -drawSize / 2, drawSize, drawSize);
+
   ctx.restore();
 }
 
 export function draw() {
-  // 1 e 2. Desenha o Fundo Xadrez (Estilo Google)
+  // Desenha o Fundo Xadrez
   for (let row = 0; row < TILE_COUNT; row++) {
     for (let col = 0; col < TILE_COUNT; col++) {
-      // O Pulo do Gato Matemático: se a soma da linha com a coluna for par, é uma cor. Se for ímpar, é outra!
+      // Se a soma da linha com a coluna for par, é uma cor. Se for ímpar, é outra
       if ((row + col) % 2 === 0) {
-        ctx.fillStyle = "#7ea23a"; // Verde clássico do Google
+        ctx.fillStyle = "#7ea23a";
       } else {
-        ctx.fillStyle = "#759633"; // Verde um pouquinho mais claro
+        ctx.fillStyle = "#759633";
       }
 
+      // Desenha o campo por completo
       ctx.fillRect(col * GRID_SIZE, row * GRID_SIZE, GRID_SIZE, GRID_SIZE);
     }
   }
 
-  // 3. Desenha a Cobra por cima do Grid
   const isGhost = state.ghostEffectExpiration > Date.now();
 
   if (isGhost) {
-    ctx.globalAlpha = 0.4; // Deixa a cobra 60% transparente!
+    ctx.globalAlpha = 0.5; // Deixa a cobra 50% transparente!
   }
 
-  ctx.fillStyle = "#04d361";
   state.snake.forEach((segment, index) => {
     let angle = 0;
     let imgToDraw = bodyImg;
     let pieceScale = 1;
 
-    // 1. É A CABEÇA
+    // Desenha a cabeça
     if (index === 0) {
-      // A cada 2000ms (2s), a língua sai por 300ms!
+      // A 2 segundos, a língua sai por 300ms
       const isTongueOut = Date.now() % 2000 < 300;
       imgToDraw = isTongueOut ? headTongueImg : headImg;
 
@@ -128,28 +132,31 @@ export function draw() {
       }
 
       const dir = state.currentDirection;
+
       if (dir.x === 1) angle = 0;
       else if (dir.x === -1) angle = Math.PI;
       else if (dir.y === 1) angle = Math.PI / 2;
       else if (dir.y === -1) angle = -Math.PI / 2;
-    }
 
-    // 2. É O RABO
+    }
+    // Desenha o rabo
     else if (index === state.snake.length - 1) {
       imgToDraw = tailImg;
+
       const prevSegment = state.snake[index - 1];
+
       if (prevSegment.x > segment.x) angle = 0;
       else if (prevSegment.x < segment.x) angle = Math.PI;
       else if (prevSegment.y > segment.y) angle = Math.PI / 2;
       else if (prevSegment.y < segment.y) angle = -Math.PI / 2;
     }
 
-    // 3. É O CORPO E AS CURVAS
+    // Desenha o corpo e as curvas
     else {
       const prevSegment = state.snake[index - 1]; // Pedaço da frente
       const nextSegment = state.snake[index + 1]; // Pedaço de trás
 
-      // Se o X e o Y mudaram, é porque é uma QUINA/CURVA
+      // Se o X e o Y mudaram, é porque é uma curva
       if (prevSegment.x !== nextSegment.x && prevSegment.y !== nextSegment.y) {
         imgToDraw = curveImg;
 
@@ -163,7 +170,8 @@ export function draw() {
         else if (isUp && isRight) angle = Math.PI;
         else if (isDown && isRight) angle = -Math.PI / 2;
       }
-      // Se não for curva, é uma RETA NORMAL
+
+      // Se não for curva, é uma reta
       else {
         imgToDraw = bodyImg;
         if (prevSegment.y !== segment.y) {
@@ -172,9 +180,11 @@ export function draw() {
       }
     }
 
-    // === A MÁGICA DA INTERPOLAÇÃO (LERP) ===
+    // === INTERPOLAÇÃO LINEAR (LERP) ===
     const now = Date.now();
+    // Calcula quanto tempo a cobra demora para ir de um bloco a outro
     const moveInterval = 1000 / state.speed;
+    // porcentagem da viagem (indo de 0.0 a 1.0)
     const progress = Math.min((now - state.lastTime) / moveInterval, 1);
 
     let prevX =
@@ -213,13 +223,13 @@ export function draw() {
 
   ctx.globalAlpha = 1.0;
 
-  // Liga o modo Sombra
-  ctx.shadowColor = "rgba(0, 0, 0, 0.4)"; // Preto com 40% de opacidade
+  // Adiciona a sombra nos itens
+  ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
   ctx.shadowBlur = 8; // Deixa esfumaçado
   ctx.shadowOffsetX = 3; // Joga a sombra pra direita
   ctx.shadowOffsetY = 3; // Joga a sombra pra baixo
 
-  // 4. Pinta as Pedras (Obstáculos)
+  // Pinta as Pedras (Obstáculos)
   state.obstacles.forEach((obs) => {
     ctx.drawImage(
       rockImg,
@@ -230,14 +240,14 @@ export function draw() {
     );
   });
 
-  // 5. Pinta o Item Atual baseado no tipo
+  // Pinta o Item Atual baseado no tipo
   const itemX = state.currentItem.x * GRID_SIZE;
   const itemY = state.currentItem.y * GRID_SIZE;
-  let itemImg = appleImg; // Começa com a maçã por padrão
+  let itemImg = appleImg;
 
   switch (state.currentItem.type) {
     case "earth_fruit":
-      itemImg = earthImg; // A fruta da terra pode usar o ícone da pedra
+      itemImg = earthImg;
       break;
     case "ice_fruit":
       itemImg = iceImg;
@@ -272,7 +282,7 @@ export function draw() {
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = 0;
 
-  // Desenha o item na tela!
+  // Desenha o item na tela
   ctx.drawImage(itemImg, itemX, itemY, GRID_SIZE, GRID_SIZE);
 }
 
@@ -282,8 +292,6 @@ export function updateUI() {
   if (startScreenRecord)
     startScreenRecord.innerText = state.highScore.toString();
 
-  // === LÓGICA DO RECORDE ===
-  // Se a pontuação atual passar o recorde, a gente salva na hora!
   if (state.score > state.highScore) {
     state.highScore = state.score;
     localStorage.setItem("alienSnakeRecorde", state.highScore.toString());
@@ -320,21 +328,21 @@ export function updateUI() {
     if (pauseScreen) pauseScreen.classList.add("hidden");
   }
 
-  // ==========================================
+  // =================
   // HUD DE POWER-UPS
-  // ==========================================
+  // =================
   const now = Date.now();
   let activeEffect = "";
   let expiration = 0;
-  let totalTime = 5000; // Tempo padrão, mas agora ele muda!
+  let totalTime = 5000; // Tempo padrão
 
-  // 1. Descobre o tempo das pedras (pega a que vai demorar mais pra sumir)
+  // Descobre o tempo das pedras (pega a que vai demorar mais pra sumir)
   const maxObstacleTime =
     state.obstacles.length > 0
       ? Math.max(...state.obstacles.map((obs) => obs.expiresAt))
       : 0;
 
-  // 2. Compara todos os efeitos e mostra o que tem o maior tempo restante
+  // Compara todos os efeitos e mostra o que tem o maior tempo restante
   if (
     state.iceEffectExpiration > now &&
     state.iceEffectExpiration > expiration
@@ -343,6 +351,7 @@ export function updateUI() {
     expiration = state.iceEffectExpiration;
     totalTime = 5000;
   }
+
   if (
     state.fireEffectExpiration > now &&
     state.fireEffectExpiration > expiration
@@ -351,13 +360,13 @@ export function updateUI() {
     expiration = state.fireEffectExpiration;
     totalTime = 5000;
   }
+
   if (maxObstacleTime > now && maxObstacleTime > expiration) {
     activeEffect = "earth";
     expiration = maxObstacleTime;
     totalTime = 15000;
   }
 
-  // NOVOS EFEITOS AQUI:
   if (
     state.ghostEffectExpiration > now &&
     state.ghostEffectExpiration > expiration
@@ -366,6 +375,7 @@ export function updateUI() {
     expiration = state.ghostEffectExpiration;
     totalTime = 8000;
   }
+
   if (
     state.magnetEffectExpiration > now &&
     state.magnetEffectExpiration > expiration
@@ -374,6 +384,7 @@ export function updateUI() {
     expiration = state.magnetEffectExpiration;
     totalTime = 10000;
   }
+
   if (
     state.poisonEffectExpiration > now &&
     state.poisonEffectExpiration > expiration
@@ -385,7 +396,7 @@ export function updateUI() {
 
   const timeLeft = expiration - now;
 
-  // 3. Atualiza a tela se houver algum efeito rolando
+  // Atualiza a tela se houver algum efeito rolando
   if (activeEffect && timeLeft > 0) {
     powerupHud.classList.remove("hidden");
 
@@ -393,11 +404,10 @@ export function updateUI() {
     const seconds = (timeLeft / 1000).toFixed(1);
     powerupTimer.innerText = `${seconds}s`;
 
-    // Atualiza a barrinha (agora com a porcentagem perfeita pra cada tempo!)
+    // Atualiza a barrinha
     const percent = (timeLeft / totalTime) * 100;
     powerupBarFill.style.width = `${percent}%`;
 
-    // Troca as cores e textos dependendo do poder ativo
     if (activeEffect === "ice") {
       powerupIcon.innerText = "❄️";
       powerupName.innerText = "Gelo";
